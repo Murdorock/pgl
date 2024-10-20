@@ -1,8 +1,24 @@
 import tkinter as tk
 from tkinter import ttk
 from tkcalendar import DateEntry
+from src.gui.novedades import abrir_ventana_novedades
 
 def crear_widgets(root):
+    # Crear la barra de menú
+    barra_menu = tk.Menu(root)
+    root.config(menu=barra_menu)
+
+    # Crear el menú de navegación
+    menu_navegacion = tk.Menu(barra_menu, tearoff=0)
+    barra_menu.add_cascade(label="Navegación", menu=menu_navegacion)
+
+    # Añadir opciones al menú de navegación
+    menu_navegacion.add_command(label="Novedades", command=lambda: abrir_ventana(root, "Novedades"))
+    menu_navegacion.add_command(label="Cambios", command=lambda: abrir_ventana(root, "Cambios"))
+    menu_navegacion.add_command(label="Personal", command=lambda: abrir_ventana(root, "Personal"))
+    menu_navegacion.add_command(label="Históricos", command=lambda: abrir_ventana(root, "Históricos"))
+    menu_navegacion.add_command(label="Programaciones", command=lambda: abrir_ventana(root, "Programaciones"))
+
     frame_izquierda = tk.Frame(root)
     frame_izquierda.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 
@@ -25,6 +41,16 @@ def crear_widgets(root):
     cal.pack(pady=3)
 
     return frame_izquierda, ciclo_var, mes_var, ciclo_label, mes_label, cal
+
+def abrir_ventana(root, nombre_ventana):
+    if nombre_ventana == "Novedades":
+        abrir_ventana_novedades(root)
+    else:
+        # Manejo temporal para otras ventanas
+        nueva_ventana = tk.Toplevel(root)
+        nueva_ventana.title(nombre_ventana)
+        nueva_ventana.geometry("400x300")
+        tk.Label(nueva_ventana, text=f"Ventana de {nombre_ventana}").pack(pady=20)
 
 def configurar_tabla(root):
     frame_derecha = tk.Frame(root)
