@@ -1,0 +1,31 @@
+   # Archivos compilados de Python
+   __pycache__/
+   *.py[cod]
+   *$py.class
+
+   # Entornos virtuales
+   venv/
+   env/
+   .env
+
+   # Archivos de base de datos
+   *.db
+   *.sqlite3
+
+   # Archivos de sistema
+   .DS_Store
+   Thumbs.db
+
+   # Archivos de IDE y editores
+   .vscode/
+   .idea/
+   *.swp
+   *.swo
+
+   # Archivos de log
+   *.log
+
+   # Archivos temporales
+   *.tmp
+   *.bak
+   *.swp
