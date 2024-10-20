@@ -128,8 +128,8 @@ def asignar_lectores_a_correrias(cursor, nombre_plantilla, correrias, lectores):
     personal = cursor.fetchall()
     cedula_lector = {lector: cedula for cedula, lector in personal}
 
-    cursor.execute("SELECT * FROM NOVEDADES")
-    novedades = set(filter(None, [item for sublist in cursor.fetchall() for item in sublist]))
+    cursor.execute("SELECT * FROM Novedades")
+    Novedades = set(filter(None, [item for sublist in cursor.fetchall() for item in sublist]))
 
     cedulas_historicos = {}
     lectores_historicos = {}
@@ -157,7 +157,7 @@ def asignar_lectores_a_correrias(cursor, nombre_plantilla, correrias, lectores):
             cedula = cedula_lector.get(lector_id)
             if (supervisor == supervisor_lector and 
                 lector_id not in lectores_asignados and 
-                lector_id not in novedades and 
+                lector_id not in Novedades and 
                 (correria_id not in cedulas_historicos or cedula not in cedulas_historicos[correria_id]) and 
                 (correria_id not in lectores_historicos or lector_id not in lectores_historicos[correria_id])):
                 cursor.execute(f"UPDATE {nombre_plantilla} SET CODIGO = ? WHERE CORRERIA = ?", (lector_id, correria_id))
@@ -170,7 +170,7 @@ def asignar_lectores_a_correrias(cursor, nombre_plantilla, correrias, lectores):
                 supervisor_lector, lector_id, transporte_lector = lector
                 cedula = cedula_lector.get(lector_id)
                 if (lector_id not in lectores_asignados and 
-                    lector_id not in novedades and 
+                    lector_id not in Novedades and 
                     (correria_id not in cedulas_historicos or cedula not in cedulas_historicos[correria_id]) and 
                     (correria_id not in lectores_historicos or lector_id not in lectores_historicos[correria_id])):
                     cursor.execute(f"UPDATE {nombre_plantilla} SET CODIGO = ? WHERE CORRERIA = ?", (lector_id, correria_id))

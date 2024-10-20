@@ -116,8 +116,19 @@ class VentanaCambios:
                 messagebox.showinfo("Información", f"No se encontraron datos personales para el lector {lector}")
                 return
 
-            # Combinar los datos
-            datos_completos = datos_personal + datos_plantilla[1:] + ("", "", "")  # Añadimos REEMPLAZA_A, NOVEDAD y PEBDUI vacíos
+            # Combinar los datos en el orden correcto
+            datos_completos = (
+                datos_personal[0],  # CELULAR_CORPORATIVO
+                datos_personal[1],  # CELULAR
+                datos_plantilla[1],  # SUPERVISOR
+                datos_plantilla[0],  # CODIGO
+                "",                 # REEMPLAZA_A (vacío)
+                datos_plantilla[2],  # CORRERIA
+                "",                 # NOVEDAD (vacío)
+                datos_plantilla[3],  # CALI
+                datos_personal[2],  # CEDULA
+                ""                  # PEBDUI (vacío)
+            )
             self.actualizar_tabla([datos_completos])
 
         except sqlite3.Error as e:
@@ -157,9 +168,26 @@ class VentanaCambios:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (datos_personal[0], datos_personal[1], datos_plantilla[0], lector_nuevo, lector_actual, datos_plantilla[1], novedad, datos_plantilla[2], datos_personal[2], "", fecha_actual))
 
+            # Actualizar la tabla Novedades
+            self.cursor.execute(f'''
+                UPDATE Novedades 
+                SET {novedad} = CASE
+                    WHEN {novedad} IS NULL OR {novedad} = '' THEN ?
+                    ELSE {novedad} || ', ' || ?
+                END
+                WHERE ID = (
+                    SELECT ID FROM Novedades
+                    WHERE (
+                        {novedad} IS NULL OR {novedad} = ''
+                        OR {novedad} NOT LIKE '%' || ? || '%'
+                    )
+                    LIMIT 1
+                )
+            ''', (lector_actual, lector_actual, lector_actual))
+
             self.conn.commit()
 
-            messagebox.showinfo("Éxito", f"El lector {lector_actual} ha sido reemplazado por {lector_nuevo}.")
+            messagebox.showinfo("Éxito", f"El lector {lector_actual} ha sido reemplazado por {lector_nuevo} y registrado en Novedades.")
             self.actualizar_tabla_cambios()
 
         except sqlite3.Error as e:

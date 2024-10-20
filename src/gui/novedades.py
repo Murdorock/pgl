@@ -19,7 +19,7 @@ class VentanaNovedades:
         conexion = configurar_base_datos()
         cursor = conexion.cursor()
         cursor.execute(f'''
-            CREATE TABLE IF NOT EXISTS Novedades_Global (
+            CREATE TABLE IF NOT EXISTS Novedades (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 {", ".join([f"{tipo} TEXT" for tipo in self.tipos_novedad])}
             )
@@ -123,7 +123,7 @@ class VentanaNovedades:
         # Cargar datos de la base de datos
         conexion = configurar_base_datos()
         cursor = conexion.cursor()
-        cursor.execute(f"SELECT ID, {', '.join(self.tipos_novedad)} FROM Novedades_Global")
+        cursor.execute(f"SELECT ID, {', '.join(self.tipos_novedad)} FROM Novedades")
         for i, novedad in enumerate(cursor.fetchall()):
             id_novedad = novedad[0]
             valores = [valor if valor else "" for valor in novedad[1:]]
@@ -149,21 +149,21 @@ class VentanaNovedades:
         try:
             for codigo in codigos:
                 # Verificar si el código ya existe en cualquier columna
-                cursor.execute(f"SELECT COUNT(*) FROM Novedades_Global WHERE {' OR '.join([f'{t} = ?' for t in self.tipos_novedad])}", (codigo,) * len(self.tipos_novedad))
+                cursor.execute(f"SELECT COUNT(*) FROM Novedades WHERE {' OR '.join([f'{t} = ?' for t in self.tipos_novedad])}", (codigo,) * len(self.tipos_novedad))
                 if cursor.fetchone()[0] > 0:
                     messagebox.showerror("Error", f"El código {codigo} ya existe en la tabla")
                     continue
 
                 # Buscar una fila con espacio disponible
-                cursor.execute(f"SELECT ID FROM Novedades_Global WHERE {tipo} IS NULL OR {tipo} = '' LIMIT 1")
+                cursor.execute(f"SELECT ID FROM Novedades WHERE {tipo} IS NULL OR {tipo} = '' LIMIT 1")
                 fila_disponible = cursor.fetchone()
 
                 if fila_disponible:
                     # Actualizar fila existente
-                    cursor.execute(f"UPDATE Novedades_Global SET {tipo} = ? WHERE ID = ?", (codigo, fila_disponible[0]))
+                    cursor.execute(f"UPDATE Novedades SET {tipo} = ? WHERE ID = ?", (codigo, fila_disponible[0]))
                 else:
                     # Insertar nueva fila
-                    cursor.execute(f"INSERT INTO Novedades_Global ({tipo}) VALUES (?)", (codigo,))
+                    cursor.execute(f"INSERT INTO Novedades ({tipo}) VALUES (?)", (codigo,))
 
             conexion.commit()
             messagebox.showinfo("Éxito", "Novedad(es) agregada(s) correctamente")
@@ -214,7 +214,7 @@ class VentanaNovedades:
             print(f"Intentando eliminar código: {codigo_a_eliminar} del tipo: {tipo_novedad}")
 
             # Actualizar la fila, estableciendo el valor a NULL para el tipo de novedad correspondiente
-            cursor.execute(f"UPDATE Novedades_Global SET {tipo_novedad} = NULL WHERE ID = ?", (id_novedad,))
+            cursor.execute(f"UPDATE Novedades SET {tipo_novedad} = NULL WHERE ID = ?", (id_novedad,))
             
             if cursor.rowcount == 0:
                 messagebox.showwarning("Advertencia", f"No se pudo eliminar el código {codigo_a_eliminar}")
@@ -242,7 +242,7 @@ class VentanaNovedades:
         conexion = configurar_base_datos()
         cursor = conexion.cursor()
         try:
-            query = f"SELECT ID, {', '.join(self.tipos_novedad)} FROM Novedades_Global WHERE {' OR '.join([f'{tipo} LIKE ?' for tipo in self.tipos_novedad])}"
+            query = f"SELECT ID, {', '.join(self.tipos_novedad)} FROM Novedades WHERE {' OR '.join([f'{tipo} LIKE ?' for tipo in self.tipos_novedad])}"
             cursor.execute(query, tuple(f'%{busqueda}%' for _ in self.tipos_novedad))
             resultados = cursor.fetchall()
 
