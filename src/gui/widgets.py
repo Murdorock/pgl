@@ -4,7 +4,7 @@ from tkcalendar import DateEntry
 from src.gui.novedades import abrir_ventana_novedades
 from src.gui.personal import abrir_ventana_personal
 from src.gui.cambios import abrir_ventana_cambios
-
+from src.gui.historicos import abrir_ventana_historicos
 def crear_widgets(root):
     # Crear la barra de menú
     barra_menu = tk.Menu(root)
@@ -51,6 +51,8 @@ def abrir_ventana(root, nombre_ventana):
         abrir_ventana_personal(root)
     elif nombre_ventana == "Cambios":
         abrir_ventana_cambios(root)
+    elif nombre_ventana == "Históricos":
+        abrir_ventana_historicos(root)
     else:
         # Manejo temporal para otras ventanas
         nueva_ventana = tk.Toplevel(root)
