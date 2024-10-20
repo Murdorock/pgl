@@ -132,9 +132,9 @@ class VentanaNovedades:
         conexion.close()
 
         # Imprimir información de depuración
-        print("Contenido de la tabla después de cargar:")
-        for item in self.tabla.get_children():
-            print(self.tabla.item(item)['values'])
+        # print("Contenido de la tabla después de cargar:")
+        # for item in self.tabla.get_children():
+        #     print(self.tabla.item(item)['values'])
 
     def agregar_novedad(self):
         codigos = self.entrada_codigo.get().split()

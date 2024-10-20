@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkcalendar import DateEntry
 from src.gui.novedades import abrir_ventana_novedades
+from src.gui.personal import abrir_ventana_personal
+from src.gui.cambios import abrir_ventana_cambios
 
 def crear_widgets(root):
     # Crear la barra de menú
@@ -45,6 +47,10 @@ def crear_widgets(root):
 def abrir_ventana(root, nombre_ventana):
     if nombre_ventana == "Novedades":
         abrir_ventana_novedades(root)
+    elif nombre_ventana == "Personal":
+        abrir_ventana_personal(root)
+    elif nombre_ventana == "Cambios":
+        abrir_ventana_cambios(root)
     else:
         # Manejo temporal para otras ventanas
         nueva_ventana = tk.Toplevel(root)
