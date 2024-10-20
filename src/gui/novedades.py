@@ -229,38 +229,6 @@ class VentanaNovedades:
         finally:
             conexion.close()
 
-    def buscar_novedad(self):
-        busqueda = self.entrada_busqueda.get().strip()
-        if not busqueda:
-            messagebox.showerror("Error", "Por favor, ingrese un término de búsqueda")
-            return
-
-        # Limpiar tabla existente
-        for i in self.tabla.get_children():
-            self.tabla.delete(i)
-
-        # Buscar en la base de datos
-        conexion = configurar_base_datos()
-        cursor = conexion.cursor()
-        try:
-            query = f"SELECT ID, {', '.join(self.tipos_novedad)} FROM Novedades_Global WHERE {' OR '.join([f'{tipo} LIKE ?' for tipo in self.tipos_novedad])}"
-            cursor.execute(query, tuple(f'%{busqueda}%' for _ in self.tipos_novedad))
-            resultados = cursor.fetchall()
-
-            if not resultados:
-                messagebox.showinfo("Búsqueda", "No se encontraron resultados")
-            else:
-                for i, novedad in enumerate(resultados):
-                    id_novedad = novedad[0]
-                    valores = [valor if valor else "" for valor in novedad[1:]]
-                    if any(valores):  # Solo insertar si hay al menos un valor no vacío
-                        tag = 'evenrow' if i % 2 == 0 else 'oddrow'
-                        self.tabla.insert("", tk.END, values=(id_novedad, *valores), tags=(tag,))
-        except Exception as e:
-            messagebox.showerror("Error", f"Error al buscar: {str(e)}")
-        finally:
-            conexion.close()
-
 def abrir_ventana_novedades(root):
     ventana_novedades = tk.Toplevel(root)
     VentanaNovedades(ventana_novedades)
