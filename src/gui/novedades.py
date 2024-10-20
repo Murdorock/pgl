@@ -102,7 +102,8 @@ class VentanaNovedades:
         item = self.tabla.identify('item', event.x, event.y)
         if item:
             print(f"Doble clic en el item: {self.tabla.item(item)['values']}")
-            self.eliminar_novedad()
+            self.tabla.selection_set(item)  # Asegurarse de que el item esté seleccionado
+            self.eliminar_novedad(item)
         else:
             print("Doble clic fuera de cualquier item")
 
@@ -131,10 +132,9 @@ class VentanaNovedades:
                 self.tabla.insert("", tk.END, values=(id_novedad, *valores), tags=(tag,))
         conexion.close()
 
-        # Imprimir información de depuración
-        # print("Contenido de la tabla después de cargar:")
-        # for item in self.tabla.get_children():
-        #     print(self.tabla.item(item)['values'])
+        # Seleccionar el primer item si existe
+        if self.tabla.get_children():
+            self.tabla.selection_set(self.tabla.get_children()[0])
 
     def agregar_novedad(self):
         codigos = self.entrada_codigo.get().split()
@@ -173,16 +173,15 @@ class VentanaNovedades:
         finally:
             conexion.close()
 
-    def eliminar_novedad(self):
-        seleccion = self.tabla.selection()
-        print(f"Selección en eliminar_novedad: {seleccion}")  # Información de depuración
+    def eliminar_novedad(self, item=None):
+        if item is None:
+            seleccion = self.tabla.selection()
+            if not seleccion:
+                messagebox.showerror("Error", "Por favor, seleccione una novedad para eliminar")
+                return
+            item = seleccion[0]
 
-        if not seleccion:
-            messagebox.showerror("Error", "Por favor, seleccione una novedad para eliminar")
-            return
-
-        item = self.tabla.item(seleccion[0])
-        valores = item['values']
+        valores = self.tabla.item(item)['values']
         print(f"Valores del item seleccionado: {valores}")  # Información de depuración
 
         if not valores:
@@ -226,6 +225,38 @@ class VentanaNovedades:
             self.cargar_novedades()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo eliminar la novedad: {str(e)}")
+        finally:
+            conexion.close()
+
+    def buscar_novedad(self):
+        busqueda = self.entrada_busqueda.get().strip()
+        if not busqueda:
+            messagebox.showerror("Error", "Por favor, ingrese un término de búsqueda")
+            return
+
+        # Limpiar tabla existente
+        for i in self.tabla.get_children():
+            self.tabla.delete(i)
+
+        # Buscar en la base de datos
+        conexion = configurar_base_datos()
+        cursor = conexion.cursor()
+        try:
+            query = f"SELECT ID, {', '.join(self.tipos_novedad)} FROM Novedades_Global WHERE {' OR '.join([f'{tipo} LIKE ?' for tipo in self.tipos_novedad])}"
+            cursor.execute(query, tuple(f'%{busqueda}%' for _ in self.tipos_novedad))
+            resultados = cursor.fetchall()
+
+            if not resultados:
+                messagebox.showinfo("Búsqueda", "No se encontraron resultados")
+            else:
+                for i, novedad in enumerate(resultados):
+                    id_novedad = novedad[0]
+                    valores = [valor if valor else "" for valor in novedad[1:]]
+                    if any(valores):  # Solo insertar si hay al menos un valor no vacío
+                        tag = 'evenrow' if i % 2 == 0 else 'oddrow'
+                        self.tabla.insert("", tk.END, values=(id_novedad, *valores), tags=(tag,))
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al buscar: {str(e)}")
         finally:
             conexion.close()
 
